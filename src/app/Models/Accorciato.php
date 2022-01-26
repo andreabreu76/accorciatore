@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Http\Controllers\IpController;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -31,11 +32,11 @@ class Accorciato extends Model
 
     /**
      * @param $url
-     * @return bool
+     * @return bool|Builder|Model|object
      */
-    public function encontreAccorciato($url): bool
+    public function encontreAccorciato($url)
     {
-        $accorciato = Accorciato::where('url', $url)->first();
+        $accorciato = Accorciato::query()->where('url', $url)->first();
         if ($accorciato) {
             $accorciato->visita = $accorciato->visita + 1;
             $accorciato->save();
