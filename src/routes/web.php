@@ -14,5 +14,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json([
+        'stato'=>'Attivo',
+        'data'=>date('Y-m-d H:i:s'),
+        'ip'=>request()->ip(),
+        'browser'=>request()->header('User-Agent'),
+        'titolo' => 'Accorciato',
+        'descrizione' => 'Sfida di sviluppo per Tiago Perreli',
+    ], 200);
 });

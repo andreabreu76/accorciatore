@@ -25,22 +25,20 @@ class Accorciato extends Model
         'ip',
         'visita',
         'stato',
-        'crate_at',
+        'create_at',
         'updated_at'
     ];
 
 
     /**
      * @param $url
-     * @return bool|Builder|Model|object
+     * @return bool
      */
-    public function encontreAccorciato($url)
+    public function encontreAccorciato($url): bool
     {
         $accorciato = Accorciato::query()->where('url', $url)->first();
         if ($accorciato) {
-            $accorciato->visita = $accorciato->visita + 1;
-            $accorciato->save();
-            return $accorciato;
+            return true;
         }
         return false;
     }
@@ -54,6 +52,19 @@ class Accorciato extends Model
     }
 
     /**
+     * @param $cogname
+     * @return bool|Builder[]|Collection
+     */
+    public function mostraAccorciatoCogname($cogname)
+    {
+        $accorciato = Accorciato::query()->where('cognaome', $cogname)->get();
+        if (!$accorciato) {
+            return false;
+        }
+        return $accorciato;
+    }
+
+    /**
      * @param Request $request
      * @return JsonResponse
      */
@@ -63,21 +74,22 @@ class Accorciato extends Model
             'url' => ['required', 'url'],
         ]);
 
-        $accorciatoEsistere = Accorciato::encontreAccorciato($request->url)->first();
-        if ($accorciatoEsistere) {
+        $accorciatoEsistere = self::encontreAccorciato($request->url);
+        if ($accorciatoEsistere != false) {
             return response()->json('Questo URL esiste già.', 401);
         }
 
-        $accorciato = Accorciato::query()->create([
+        $accorciato = [
             'url' => $request->url,
-            'cognome' => substr(md5(uniqid(rand(), true)),0,6),
-            'ip' => (new IpController())->getIp(),
-            'visita' => 0,
+            'cognaome' => substr(md5(uniqid(rand(), true)),0,6),
             'stato' => Accorciato::STATO_ATTIVO,
+            'ip' => "0",
             'crate_at' => date('Y-m-d H:i:s')
-        ])['cognome'];
+        ];
 
-        return response()->json(["Accorciato:" => "https://".env("URI_ENCURTADA")."/".$accorciato]);
+        $accorciato = Accorciato::query()->create($accorciato)['cognaome'];
+
+        return response()->json(["Accorciato:" => env("URI_ENCURTADA")."/".$accorciato]);
     }
 
     /**
@@ -110,6 +122,5 @@ class Accorciato extends Model
         }
         return response()->json('Accorciato non trovato.', 404);
     }
-
 
 }
